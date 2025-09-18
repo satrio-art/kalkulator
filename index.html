@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kalkulator Modern</title>
+  <style>
+    :root{
+      --bg:#0f1720;
+      --panel:#121826;
+      --accent:#00bcd4;
+      --accent-2:#ff7043;
+      --muted:#9aa4b2;
+      --glass: rgba(255,255,255,0.03);
+      --shadow: 0 6px 18px rgba(2,6,23,0.6);
+      --radius:12px;
+      --btn-radius:10px;
+      --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box;font-family:var(--font); -webkit-tap-highlight-color: transparent;}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071021 0%, #0b1220 100%);color:#e6eef6}
+    .wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+      gap:24px;
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      width:420px;
+      max-width:92vw;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#4dd0e1);display:flex;align-items:center;justify-content:center;font-weight:700;color:#012026;font-size:20px;box-shadow:0 6px 18px rgba(0,188,212,0.12) inset;
+    }
+    h1{font-size:18px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    /* Screen */
+    .screen{
+      background:var(--glass);
+      border-radius:10px;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .display-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
+    .expression{
+      font-size:20px;
+      color:#eaf6fb;
+      text-align:right;
+      min-height:34px;
+      overflow-x:auto;
+      padding-bottom:2px;
+      white-space:nowrap;
+    }
+    .result{
+      font-size:28px;
+      color:var(--accent);
+      text-align:right;
+      min-height:34px;
+      white-space:nowrap;
+    }
+
+    /* Buttons grid */
+    .kbd{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+    }
+    button.calc-btn{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
+      color: #eaf6fb;
+      border: none;
+      padding:14px;
+      border-radius:var(--btn-radius);
+      font-size:16px;
+      cursor:pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+      transition:transform .08s ease, box-shadow .08s ease, background .12s;
+    }
+    button.calc-btn:hover{ transform: translateY(-3px); box-shadow: 0 8px 22px rgba(2,6,23,0.6); }
+    button.op{ background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01)); color: var(--accent-2); font-weight:600; }
+    button.equal{ background: linear-gradient(180deg, var(--accent), #00a6b0); color:#012026; font-weight:700; grid-column: span 1; }
+    button.clear{ background: linear-gradient(180deg,#ff7a66,#ff5842); color:#210905; font-weight:700; }
+    button.wide{ grid-column: span 2; }
+    .small-muted{ font-size:12px; color:var(--muted); text-align:center; margin-top:6px;}
+
+    /* Right panel: history */
+    .right-panel{
+      width:320px;
+      max-width:86vw;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:12px;
+      box-shadow:var(--shadow);
+      border: 1px solid rgba(255,255,255,0.03);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:84vh;
+      overflow:auto;
+    }
+    .history-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .history-list{display:flex;flex-direction:column;gap:8px}
+    .hist-item{
+      background: rgba(255,255,255,0.02);
+      border-radius:8px;
+      padding:8px;
+      cursor:pointer;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      transition:background .12s;
+    }
+    .hist-item:hover{ background: rgba(255,255,255,0.03); }
+    .hist-exp{ color:var(--muted); font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%;}
+    .hist-res{ color:var(--accent); font-weight:700; font-size:14px; }
+
+    /* responsive */
+    @media (max-width:1024px){
+      .wrap{flex-direction:column;align-items:stretch;padding:16px}
+      .card, .right-panel{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="application" aria-label="Kalkulator">
+      <div class="header">
+        <div class="logo">C</div>
+        <div>
+          <h1>Kalkulator Modern</h1>
+          <p class="lead">Operasi dasar • Keyboard support • History</p>
+        </div>
+      </div>
+
+      <div class="screen" id="screen">
+        <div class="display-top">
+          <div class="small-muted">Tekan Esc untuk bersihkan • Enter untuk =</div>
+          <div class="small-muted" id="mode">Angka</div>
+        </div>
+        <div class="expression" id="expression" aria-live="polite"></div>
+        <div class="result" id="result">0</div>
+      </div>
+
+      <div class="kbd" id="keys" aria-hidden="false">
+        <!-- row 1 -->
+        <button class="calc-btn clear" data-action="clear">C</button>
+        <button class="calc-btn op" data-action="back">⌫</button>
+        <button class="calc-btn op" data-value="(">(</button>
+        <button class="calc-btn op" data-value=")">)</button>
+
+        <!-- row 2 -->
+        <button class="calc-btn" data-value="7">7</button>
+        <button class="calc-btn" data-value="8">8</button>
+        <button class="calc-btn" data-value="9">9</button>
+        <button class="calc-btn op" data-value="/">÷</button>
+
+        <!-- row 3 -->
+        <button class="calc-btn" data-value="4">4</button>
+        <button class="calc-btn" data-value="5">5</button>
+        <button class="calc-btn" data-value="6">6</button>
+        <button class="calc-btn op" data-value="*">×</button>
+
+        <!-- row 4 -->
+        <button class="calc-btn" data-value="1">1</button>
+        <button class="calc-btn" data-value="2">2</button>
+        <button class="calc-btn" data-value="3">3</button>
+        <button class="calc-btn op" data-value="-">−</button>
+
+        <!-- row 5 -->
+        <button class="calc-btn wide" data-value="0">0</button>
+        <button class="calc-btn" data-value=".">.</button>
+        <button class="calc-btn op" data-value="+">+</button>
+
+        <!-- row 6 -->
+        <button class="calc-btn op" data-action="percent">%</button>
+        <button class="calc-btn equal" data-action="equals">=</button>
+        <button class="calc-btn op" data-action="neg">±</button>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+        <div class="small-muted">Valid chars: digits, + - * / ( ) . %</div>
+        <div class="small-muted">Built for learning</div>
+      </div>
+    </div>
+
+    <aside class="right-panel" aria-label="History">
+      <div class="history-head">
+        <div>
+          <strong>History</strong>
+          <div class="small-muted">Klik untuk pakai kembali</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="clear-history" class="calc-btn" title="Bersihkan history" style="padding:8px 10px;font-size:13px;background:rgba(255,255,255,0.02)">Kosongkan</button>
+        </div>
+      </div>
+      <div class="history-list" id="historyList" role="list"></div>
+    </aside>
+  </div>
+
+  <script>
+    (function(){
+      // Elemen
+      const expressionEl = document.getElementById('expression');
+      const resultEl = document.getElementById('result');
+      const keys = document.getElementById('keys');
+      const historyList = document.getElementById('historyList');
+      const clearHistoryBtn = document.getElementById('clear-history');
+      const modeEl = document.getElementById('mode');
+
+      let expr = "";
+      let lastResult = null;
+      let history = JSON.parse(localStorage.getItem('calc_history') || '[]');
+
+      // Utilities
+      function sanitizeForEval(s){
+        // hanya izinkan karakter angka, operator, paren, titik, spasi, persen
+        // ganti simbol ×/÷ ke * /
+        s = s.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+        if(!/^[0-9+\-*/().%\s]*$/.test(s)) return null;
+        return s;
+      }
+
+      function formatDisplay(s){
+        // tampilkan kosong jadi 0
+        return s || '';
+      }
+
+      function updateScreen(){
+        expressionEl.textContent = formatDisplay(expr);
+        resultEl.textContent = (lastResult === null ? '0' : lastResult);
+        modeEl.textContent = (document.activeElement && document.activeElement.tagName === 'INPUT') ? 'Input' : 'Angka';
+      }
+
+      function pushHistory(exp, res){
+        const item = {exp, res, t: Date.now()};
+        history.unshift(item);
+        // keep max 30 entries
+        history = history.slice(0,30);
+        localStorage.setItem('calc_history', JSON.stringify(history));
+        renderHistory();
+      }
+
+      function renderHistory(){
+        historyList.innerHTML = '';
+        if(history.length === 0){
+          historyList.innerHTML = '<div class="small-muted">Belum ada history</div>';
+          return;
+        }
+        history.forEach((h, idx) => {
+          const div = document.createElement('div');
+          div.className = 'hist-item';
+          div.setAttribute('role','listitem');
+          div.innerHTML = `<div class="hist-exp">${h.exp}</div><div class="hist-res">${h.res}</div>`;
+          div.onclick = () => {
+            expr = h.exp;
+            lastResult = h.res;
+            updateScreen();
+          };
+          historyList.appendChild(div);
+        });
+      }
+
+      // Core operations
+      function append(v){
+        expr += v;
+        updateScreen();
+      }
+
+      function backspace(){
+        expr = expr.slice(0, -1);
+        updateScreen();
+      }
+
+      function clearAll(){
+        expr = "";
+        lastResult = null;
+        updateScreen();
+      }
+
+      function toggleNeg(){
+        // try to toggle sign of the last number in expression
+        // find last number
+        const m = expr.match(/([0-9.]+)$/);
+        if(!m) return;
+        const num = m[1];
+        const start = expr.length - num.length;
+        const toggled = (num.startsWith('-')) ? num.slice(1) : ('-' + num);
+        expr = expr.slice(0,start) + toggled;
+        updateScreen();
+      }
+
+      function applyPercent(){
+        // transform last number N to (N/100)
+        const m = expr.match(/([0-9.]+)$/);
+        if(!m) return;
+        const num = m[1];
+        const start = expr.length - num.length;
+        const replaced = `(${num}/100)`;
+        expr = expr.slice(0,start) + replaced;
+        updateScreen();
+      }
+
+      function evaluateExpression(){
+        const s = sanitizeForEval(expr);
+        if(s === null){
+          lastResult = 'Error';
+          updateScreen();
+          return;
+        }
+        try{
+          // eslint-disable-next-line no-eval
+          let val = eval(s);
+          // guard divide by zero or non-finite
+          if(!isFinite(val)) throw new Error('Invalid math');
+          // round to avoid long fractions
+          if(typeof val === 'number') {
+            val = Math.round((val + Number.EPSILON) * 1e12) / 1e12;
+          }
+          lastResult = String(val);
+          pushHistory(expr, lastResult);
+          expr = ''; // clear expression after evaluate, but keep lastResult
+          updateScreen();
+        }catch(e){
+          lastResult = 'Error';
+          updateScreen();
+        }
+      }
+
+      // init
+      renderHistory();
+      updateScreen();
+
+      // Event listeners: buttons
+      keys.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button');
+        if(!btn) return;
+        const val = btn.getAttribute('data-value');
+        const action = btn.getAttribute('data-action');
+
+        if(action === 'clear'){
+          clearAll();
+        } else if(action === 'back'){
+          backspace();
+        } else if(action === 'equals'){
+          evaluateExpression();
+        } else if(action === 'percent'){
+          applyPercent();
+        } else if(action === 'neg'){
+          toggleNeg();
+        } else if(val !== null){
+          append(val);
+        }
+      });
+
+      // Keyboard support
+      window.addEventListener('keydown', (ev) => {
+        if(ev.key === 'Escape'){
+          ev.preventDefault();
+          clearAll();
+          return;
+        }
+        if(ev.key === 'Enter' || ev.key === '='){
+          ev.preventDefault();
+          evaluateExpression();
+          return;
+        }
+        if(ev.key === 'Backspace'){
+          ev.preventDefault();
+          backspace();
+          return;
+        }
+        // digits, operators, parentheses, dot, percent
+        const allowed = '0123456789+-*/().%';
+        if(allowed.indexOf(ev.key) !== -1){
+          ev.preventDefault();
+          // map × ÷ − from numpad? Usually fine.
+          append(ev.key);
+          return;
+        }
+      });
+
+      // clear history
+      clearHistoryBtn.addEventListener('click', () => {
+        if(!confirm('Kosongkan history?')) return;
+        history = [];
+        localStorage.removeItem('calc_history');
+        renderHistory();
+      });
+
+      // touch-friendly: long-press clear to clear history quickly (mobile nicety)
+      let holdTimer = null;
+      clearHistoryBtn.addEventListener('mousedown', startHold);
+      clearHistoryBtn.addEventListener('touchstart', startHold);
+      clearHistoryBtn.addEventListener('mouseup', stopHold);
+      clearHistoryBtn.addEventListener('mouseout', stopHold);
+      clearHistoryBtn.addEventListener('touchend', stopHold);
+
+      function startHold(){
+        holdTimer = setTimeout(() => {
+          if(confirm('Hapus semua history tanpa konfirmasi lebih lanjut?')){
+            history = [];
+            localStorage.removeItem('calc_history');
+            renderHistory();
+          }
+        }, 1000);
+      }
+      function stopHold(){
+        if(holdTimer) clearTimeout(holdTimer);
+        holdTimer = null;
+      }
+
+      // expose for debug (optional)
+      window._calc = { getHistory: () => history, clearAll, evaluateExpression };
+    })();
+  </script>
+</body>
+</html>
